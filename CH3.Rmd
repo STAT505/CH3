@@ -1,0 +1,184 @@
+---
+title: "Regression and Other Stories: Ch 3"
+output: pdf_document
+---
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse) 
+library(gridExtra)
+set.seed(08312020)
+```
+
+Chapter 3 focuses on important statistical and mathematical understanding for this class. As the semester progresses, and depending on how 506 will be taught, the treatment of these things might differ.
+
+\vfill
+
+
+Recall the Brazilian Beer dataset. Let $y_i$ be the response variable, beer consumption, and $x_i$ be the maximum temperature, both on day $i$.
+
+\vfill
+
+Then using scalar notation, we can write out the model as
+
+
+
+
+\vfill
+
+This model results in a linear relationship between y and x, for the deterministic portion. 
+
+\vfill
+
+\newpage
+
+
+```{r, echo = F, message = F}
+beer <- read_csv('http://math.montana.edu/ahoegh/Data/Brazil_cerveja.csv')
+beer %>% ggplot(aes(y = consumed, x = max_tmp)) +
+  geom_point(alpha = .1) + 
+ # geom_smooth(method = 'lm', formula = 'y~x') + 
+  theme_bw() + 
+  xlab('Maximum Temperature (C)') +
+  ylab('Beer Consumed (L)') +
+  ylim(0,NA) +
+  xlim(0,NA) +
+  annotate("text", x = 5, y = 5, label = "Intercept = 8") +
+  geom_abline(intercept = 8, slope = 0.66) + 
+  annotate("text", x = 10, y = 20, label = "Slope = .66", angle = 30) +
+  annotate("point", x = 0, y = 8 )
+```
+
+
+### Linear Algebra
+
+Using matrix algebra, this model can also be formulated as
+
+\begin{equation}
+\vec{y} = X \vec{\beta} + \vec{\epsilon},
+\end{equation}
+
+where $\vec{y}$ is a $n \times 1$ vector, $X$ is a $n \times 2$ matrix, $\vec{\beta}$ is a $2 \times 1$ vector, and $\vec{\epsilon}$ is a $n \times 1$ vector.
+
+\vfill
+\vfill
+\vfill
+
+\newpage
+
+### Non-linear relationships
+
+While linear models assume a linear relationship between $y$ and $x$, we can also transform covariates.
+
+\vfill
+
+
+```{r}
+## Simulate logarithmic relationship
+dat <- tibble(x = runif(1000, min = 1, max = 10)) %>% 
+  mutate(log_x = log(x), y = log_x + rnorm(1000, mean = 0, sd =.1)) 
+```
+
+```{r, fig.cap = 'Plots of y vs. x (left panel) and log(x) (right panel). The figure in the left shows a non-linear relationship between y and x. The blue line is a LOESS curve and the red line is a linear relationship. The panal on the right shows a linear relationship between y and log(x).'}
+fig1 <- dat %>% ggplot(aes(y=y,x=x)) + geom_point(alpha = .2) +
+  geom_smooth(method = 'lm', formula = 'y~x', color = 'red', linetype = 2) + 
+  geom_smooth(method = 'loess', formula = 'y~x') + theme_bw()
+fig2 <- dat %>% ggplot(aes(y=y,x=log_x)) + geom_point(alpha = .2) + theme_bw() +
+  geom_smooth(method = 'lm', formula = 'y~x') 
+grid.arrange(fig1, fig2, nrow = 1, ncol = 2)  
+```
+
+\newpage
+
+### Probability Distributions
+
+While regression models allow us to fit linear (and non-linear) functional relationships, 
+
+\vfill
+
+The error term ($\epsilon$) controls the randomness fundamental to data and that provides a mechanism to 
+
+\vfill
+
+Understanding uncertainty begins with a discussion about fundamental statistical terms of a probability distribution. 
+
+- mean: 
+
+\vfill
+
+- variance: 
+
+\vfill
+
+- standard deviation: 
+
+\vfill
+
+#### Normal Distribution
+
+The Central Limit Theorem (CLT) states
+
+>> that the sum of many small, independent random variables will be a random variable that approximates a normal distribution.
+
+
+\newpage
+
+The following code demonstrates the CLT. __Q__ what does each line of code do? Then complete the caption and/or title on the figure.
+
+```{r, fig.cap = ''}
+num_sims <- 1000
+num_obs <- 100
+y <- matrix(runif(num_obs* num_sims), nrow = num_sims, ncol = num_obs)
+y_sums <- tibble(y_sums = rowSums(y))
+y_sums %>% ggplot(aes(x=y_sums)) + 
+  geom_histogram(bins = 20) +
+  theme_bw()
+```
+
+\vfill
+
+In `R` we can:
+
+1. Simulate from distributions
+
+```{r}
+rnorm(n = 1, mean = 0 , sd = 1)
+```
+
+2. Find quantiles from distributions
+
+```{r}
+qnorm(.975, mean = 0, sd = 1)
+```
+
+3. We can also evaluate probability densities and cumulative distribution functions with `d` and `p`.
+
+\newpage
+
+If a random variable, $x$ is normally distributed, then a linear transformation of $x$ is also normally distributed.
+
+\vfill
+
+Assume $x \sim N(0, 1),$ then 
+
+- $ax$
+
+\vfill
+
+- $x$
+
+\vfill
+
+- $ax$
+
+### Other probability Distributions
+
+More on these later:
+
+\vfill
+
+\vfill
+\vfill
+
